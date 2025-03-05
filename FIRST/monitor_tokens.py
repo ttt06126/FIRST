@@ -23,14 +23,24 @@ def fetch_token_profiles():
         response.raise_for_status()  # Raise an error for bad status codes
         data = response.json()
 
-        # Print the API response for debugging
+        # Log the full API response for debugging
         logging.debug(f"API Response: {data}")
 
-        # Check if the response is a dictionary and has the expected structure
-        if isinstance(data, dict) and "data" in data and "profiles" in data["data"]:
-            return data["data"]["profiles"]  # Return the list of profiles
+        # Handle different response structures
+        if isinstance(data, dict):
+            if "error" in data:
+                logging.error(f"API Error: {data['error']}")
+                return []
+            elif "data" in data and "profiles" in data["data"]:
+                return data["data"]["profiles"]  # Return the list of profiles
+            else:
+                logging.error("Unexpected API response structure")
+                return []
+        elif isinstance(data, list):
+            # Handle cases where the API returns a list directly
+            return data
         else:
-            logging.error("Unexpected API response structure")
+            logging.error("Unexpected API response type")
             return []
     except requests.exceptions.RequestException as e:
         logging.error(f"Error fetching token profiles: {e}")

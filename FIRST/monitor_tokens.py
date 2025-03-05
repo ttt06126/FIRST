@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 def fetch_token_profiles():
     """Fetch the latest token profiles from DexScreener."""
     try:
-        response = requests.get(DEXSCREENER_API_URL)
+        response = requests.get(DEXSCREENER_API_URL, timeout=10)
         response.raise_for_status()  # Raise an error for bad status codes
         data = response.json()
 
@@ -70,7 +70,7 @@ def send_telegram_notification(message):
     try:
         url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
         payload = {"chat_id": TELEGRAM_CHAT_ID, "text": message}
-        response = requests.post(url, json=payload)
+        response = requests.post(url, json=payload, timeout=10)
         response.raise_for_status()
         logging.info(f"Notification sent: {message}")
     except requests.exceptions.RequestException as e:
@@ -103,11 +103,12 @@ def monitor_token_profiles():
                     )
                     send_telegram_notification(message)
 
-            # Wait before polling again (1 second)
-            time.sleep(1)  # 1-second interval (60 requests per minute)
+            # Wait before polling again (2 seconds)
+            time.sleep(2)  # 2-second interval (30 requests per minute)
         except Exception as e:
             logging.error(f"Unexpected error: {e}")
-            time.sleep(1)  # Wait before retrying
+            time.sleep(2)  # Wait before retrying
 
 if __name__ == "__main__":
+    # Start the token monitor
     monitor_token_profiles()

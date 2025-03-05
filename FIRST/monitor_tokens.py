@@ -1,7 +1,16 @@
+from flask import Flask
+import threading
 import requests
 import time
 import logging
 import os
+
+# Flask app for health checks
+app = Flask(__name__)
+
+@app.route("/health")
+def health():
+    return "OK", 200
 
 # Replace with your Telegram bot token and chat ID
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
@@ -110,4 +119,10 @@ def monitor_token_profiles():
             time.sleep(1)  # Wait before retrying
 
 if __name__ == "__main__":
+    # Start the Flask app in a separate thread
+    flask_thread = threading.Thread(target=lambda: app.run(host="0.0.0.0", port=5000))
+    flask_thread.daemon = True
+    flask_thread.start()
+
+    # Start the token monitor
     monitor_token_profiles()

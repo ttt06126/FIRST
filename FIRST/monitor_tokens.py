@@ -22,7 +22,16 @@ def fetch_token_profiles():
         response = requests.get(DEXSCREENER_API_URL)
         response.raise_for_status()  # Raise an error for bad status codes
         data = response.json()
-        return data.get("data", {}).get("profiles", [])  # Extract the list of profiles
+
+        # Print the API response for debugging
+        logging.debug(f"API Response: {data}")
+
+        # Check if the response is a dictionary and has the expected structure
+        if isinstance(data, dict) and "data" in data and "profiles" in data["data"]:
+            return data["data"]["profiles"]  # Return the list of profiles
+        else:
+            logging.error("Unexpected API response structure")
+            return []
     except requests.exceptions.RequestException as e:
         logging.error(f"Error fetching token profiles: {e}")
         return []

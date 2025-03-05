@@ -1,1 +1,1 @@
-worker: python monitor_tokens.py
+web: python monitor_tokens.py
